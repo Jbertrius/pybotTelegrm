@@ -34,9 +34,9 @@ GENDER, PHOTO, LOCATION, BIO = range(4)
 
 def start(update, context):
     # reply_keyboard = [['Add', 'Edit', 'List']]
-    reply_keyboard = [[InlineKeyboardButton('Add', callback_data='add'),
-                       InlineKeyboardButton('Edit', callback_data='edit'),
-                       InlineKeyboardButton('List', callback_data='list')]]
+    reply_keyboard = [[InlineKeyboardButton('🍅Add', callback_data='add'),
+                       InlineKeyboardButton('✍Edit', callback_data='edit'),
+                       InlineKeyboardButton('📄List', callback_data='list')]]
 
     if check_members(update.message.chat_id, ALL_MEMBERS):
         update.message.reply_text(
