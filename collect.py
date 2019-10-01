@@ -21,6 +21,8 @@ from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMa
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler,
                           ConversationHandler)
 
+from upload import *
+
 API_TOKEN = '933543664:AAEpeH1_liPQ2c8KTnGkHYF5j5YYN04qjj8'
 
 # Enable logging
@@ -29,7 +31,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-NAME, GENDER, AGE, INDO, DATE, PHONE = range(6)
+ADD, NAME, GENDER, AGE, INDO, DATE, NUM, PLACE = range(8)
 
 
 def start(update, context):
@@ -54,20 +56,91 @@ Enjoy ‼️🙈
             """.format(update.message.from_user.username),
             reply_markup=InlineKeyboardMarkup(reply_keyboard))
 
-        return NAME
+        return ADD
+
+
+def add(update, context):
+    """Show new choice of buttons"""
+    query = update.callback_query
+    bot = context.bot
+    context.user_data['type'] = query.data
+
+    user = query.from_user
+
+    # update.message.reply_text('Thank you! I hope we can talk again some day.')
+
+    bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text="Donnez le nom du fruit !"
+    )
+    return NAME
+
+
+def name(update, context):
+    user = update.message.from_user
+    context.user_data['name'] = update.message.text
+
+    reply_keyboard = [[InlineKeyboardButton('🍎Boy', callback_data='M'),
+                       InlineKeyboardButton('✏Girl', callback_data='F'),
+                       InlineKeyboardButton('⬅Retour', callback_data='retry')]]
+    update.message.reply_text('{} est une fille ou un garçon ?'.format(context.user_data['name']),
+                              reply_markup=InlineKeyboardMarkup(reply_keyboard))
+    return GENDER
 
 
 def gender(update, context):
+    """Show new choice of buttons"""
+    query = update.callback_query
+    bot = context.bot
+    context.user_data['gender'] = query.data
+
+    user = query.from_user
+    bot.edit_message_text(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+        text="{} a quel âge ?".format(context.user_data['name'])
+    )
+    return AGE
+
+
+def age(update, context):
+    """Show new choice of buttons"""
     user = update.message.from_user
+    context.user_data['age'] = update.message.text
+    update.message.reply_text("Donnez le nom de l'INDOJA !")
 
-    reply_keyboard = [[InlineKeyboardButton('🍎Boy', callback_data='boy'),
-                       InlineKeyboardButton('✏Girl', callback_data='girl'),
-                       InlineKeyboardButton('📝Retour', callback_data='retry')]]
+    return INDO
 
-    update.message.reply_text('Est-ce une fille ou un garçon ?',
-                              reply_markup=InlineKeyboardMarkup(reply_keyboard))
+
+def indo(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['indo'] = update.message.text
+    update.message.reply_text("Quel est le numero de telephone de {} ?".format(context.user_data['name']))
+
+    return NUM
+
+
+def num(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['num'] = update.message.text
+    update.message.reply_text("Où est-ce que vous l'avez évangélisez ?")
+
+    return PLACE
+
+
+def place(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['place'] = update.message.text
+
+    # update.message.reply_text("")
+    save_to_datastore(context.user_data)
 
     return ConversationHandler.END
+
 
 #
 # def photo(update, context):
@@ -108,21 +181,6 @@ def gender(update, context):
 #                               'At last, tell me something about yourself.')
 #
 #     return BIO
-
-def name(update, context):
-    """Show new choice of buttons"""
-    query = update.callback_query
-    bot = context.bot
-
-    user = query.from_user
-    # update.message.reply_text('Thank you! I hope we can talk again some day.')
-
-    bot.edit_message_text(
-        chat_id=query.message.chat_id,
-        message_id=query.message.message_id,
-        text="Donnez le nom du fruit !"
-    )
-    return GENDER
 
 
 # def bio(update, context):
@@ -165,8 +223,19 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            NAME: [CallbackQueryHandler(name, pattern='^' + 'add' + '$'),],
-            GENDER: [MessageHandler(Filters.regex('^(boy|girl)$'), gender)],
+            ADD: [CallbackQueryHandler(add, pattern='^' + 'add' + '$')],
+
+            NAME: [MessageHandler(Filters.text, name)],
+
+            GENDER: [CallbackQueryHandler(gender, pattern='^' + '(M|F)' + '$')],
+
+            AGE: [MessageHandler(Filters.regex('^[0-9]{2}$'), age)],
+
+            INDO: [MessageHandler(Filters.text, indo)],
+
+            NUM: [MessageHandler(Filters.regex('^[0-9]{10}$'), num)],
+
+            PLACE: [MessageHandler(Filters.text, place)],
 
             # PHOTO: [MessageHandler(Filters.photo, photo),
             #         CommandHandler('skip', skip_photo)],
