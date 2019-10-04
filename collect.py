@@ -81,9 +81,9 @@ def name(update, context):
     user = update.message.from_user
     context.user_data['name'] = update.message.text
 
-    reply_keyboard = [[InlineKeyboardButton('🍎Boy', callback_data='M'),
-                       InlineKeyboardButton('✏Girl', callback_data='F'),
-                       InlineKeyboardButton('⬅Retour', callback_data='retry')]]
+    reply_keyboard = [[InlineKeyboardButton('👦🏻Boy', callback_data='M'),
+                       InlineKeyboardButton('👧🏻Girl', callback_data='F'),
+                       InlineKeyboardButton('🔙Retour', callback_data='retry')]]
     update.message.reply_text('{} est une fille ou un garçon ?'.format(context.user_data['name']),
                               reply_markup=InlineKeyboardMarkup(reply_keyboard))
     return GENDER
