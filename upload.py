@@ -1,9 +1,13 @@
-from google.cloud import firestore
-import datetime
+import firebase_admin
+import google.cloud
+from firebase_admin import credentials, firestore
+
+cred = credentials.Certificate("./ServiceAccountKey.json")
+app = firebase_admin.initialize_app(cred)
 
 
 def save_to_datastore(data):
-    db = firestore.Client(project='subae-a205b')
+    db = firestore.client()
     doc_ref = db.collection('subae').document('fruits')
     log = doc_ref.set(data)
     print(log)
