@@ -31,7 +31,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-ADD, NAME, GENDER, AGE, INDO, DATE, NUM, PLACE = range(8)
+ADD, NAME, GENDER, AGE, INDO, DATE, NUM, PLACE, \
+PERSONA, NATIONALITY, RELIGION, INTEREST, HOME, \
+ENV, VACATION, OPPORTUNITY, THREAT, CHURCH_STICK, OT, FRIEND = range(20)
 
 
 def start(update, context):
@@ -41,6 +43,7 @@ def start(update, context):
                        InlineKeyboardButton('📝List', callback_data='list')]]
 
     if check_members(update.message.chat_id, ALL_MEMBERS):
+        context.user_data['user_id'] = update.message.chat_id
         update.message.reply_text(
             """
 Hello {},
@@ -136,8 +139,76 @@ def place(update, context):
     user = update.message.from_user
     context.user_data['place'] = update.message.text
 
-    # update.message.reply_text("")
-    save_to_datastore(context.user_data)
+    # update.message.reply_text(TEMPLATE.format(
+    #     context.user_data['name'],
+    #     context.user_data['age'],
+    #     context.user_data['gender'],
+    #     context.user_data['indo'],
+    #     context.user_data['num']
+    # ))
+
+    update.message.reply_text("Quel jour l'avez vous subae ?")
+
+    # res = save_to_datastore(context.user_data)
+    # if res:
+    #     update.message.reply_text("{} a été bien enregistré".format(context.user_data['name']))
+    # else:
+    #     update.message.reply_text("Erreur d'enregistrement !!")
+
+    return DATE
+
+
+def date(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['date'] = update.message.text
+    update.message.reply_text("😻Décrivez brievement sa personnalité ! 😻")
+
+    return PERSONA
+
+def persona(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['persona'] = update.message.text
+    update.message.reply_text("Et heu.., {} est de quel pays ?".format(context.user_data['name']))
+
+    return NATIONALITY
+
+def nationality(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['nationality'] = update.message.text
+    update.message.reply_text("J'espere que tu sais là où le fruit habite 😫 ?")
+
+    return HOME
+
+def home(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['home'] = update.message.text
+    update.message.reply_text("Evangélique, Catholique, ...?")
+
+    return RELIGION
+
+def religion(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['religion'] = update.message.text
+    update.message.reply_text(
+        """Comment est son environnement:
+        **Suivez le modèle** ➡️ Weekdays/WeekEnd : Exemple ⏺ 08:00-16:00/Free
+        """)
+
+    return ENV
+
+def env(update, context):
+    """Show new choice of buttons"""
+    user = update.message.from_user
+    context.user_data['env'] = update.message.text
+    update.message.reply_text(
+        """
+        Finish
+        """)
 
     return ConversationHandler.END
 
@@ -224,18 +295,18 @@ def main():
 
         states={
             ADD: [CallbackQueryHandler(add, pattern='^' + 'add' + '$')],
-
             NAME: [MessageHandler(Filters.text, name)],
-
             GENDER: [CallbackQueryHandler(gender, pattern='^' + '(M|F)' + '$')],
-
             AGE: [MessageHandler(Filters.regex('^[0-9]{2}$'), age)],
-
             INDO: [MessageHandler(Filters.text, indo)],
-
             NUM: [MessageHandler(Filters.regex('^[0-9]{10}$'), num)],
-
             PLACE: [MessageHandler(Filters.text, place)],
+            DATE: [MessageHandler(Filters.text, date)],
+            PERSONA: [MessageHandler(Filters.text, persona)],
+            NATIONALITY: [MessageHandler(Filters.text, nationality)],
+            HOME: [MessageHandler(Filters.text, home)],
+            ENV: [MessageHandler(Filters.text, env)],
+            RELIGION: [MessageHandler(Filters.text, religion)],
 
             # PHOTO: [MessageHandler(Filters.photo, photo),
             #         CommandHandler('skip', skip_photo)],
